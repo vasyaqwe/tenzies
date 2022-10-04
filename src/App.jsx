@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Die from './Die'
+import Message from './Message'
 import Confetti from 'react-confetti'
 
 function App() {
@@ -37,17 +38,25 @@ function App() {
   }
 
   function holdDice(id) {
-    setIsStopWatchActive(true)
-    setDice(oldDice => oldDice
-      .map(die => die.id === id ? { ...die, isHeld: !die.isHeld } : die))
+    if (!tenzies) {
+      setIsStopWatchActive(true)
+      setDice(oldDice => oldDice
+        .map(die => die.id === id ? { ...die, isHeld: !die.isHeld } : die))
+    }
   }
 
   function handleClick() {
+    const recordSeconds = localStorage.getItem('time');
     if (tenzies) {
-      localStorage.setItem('time', JSON.stringify(time))
+      if (recordSeconds) {
+        time < recordSeconds && localStorage.setItem('time', JSON.stringify(time))
+      } else {
+        localStorage.setItem('time', JSON.stringify(time))
+      }
       setTenzies(false)
       setDice(renderDice)
       setTime(0)
+      setRolls(0)
     } else {
       setRolls(prevRolls => prevRolls + 1)
       setDice((oldDice) => oldDice
@@ -67,22 +76,18 @@ function App() {
       holdDice={() => holdDice(die.id)}
     />
   )
-  const formattedTime = `${(Math.floor((time / 1000) % 60))}.${("0" + ((time / 10) % 100)).slice(-2)}`
-  const recordTime = JSON.parse(localStorage.getItem('time'))
+  const seconds = `${(Math.floor((time / 1000) % 60))}.${("0" + ((time / 10) % 100)).slice(-2)}`
 
   return (
     <main>
       {tenzies && <Confetti />}
       <h1 className="title">Tenzies</h1>
-      {tenzies ? <p className='instructions'>
-        With {rolls} rolls, you are victorious! <br />
-        {time < recordTime ? `You beat your last record, winning in just ${formattedTime} seconds!` :
-          `It took you ${formattedTime} seconds to win!`}
-      </p> : <p className='instructions'>Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>}
+      <Message time={time} tenzies={tenzies} rolls={rolls} seconds={seconds} />
       <div className="container">
         {diceEls}
       </div>
       <button onClick={handleClick}>{tenzies ? 'New game' : 'Roll'}</button>
+      <span className='time'>🕒{seconds}</span>
     </main>
   )
 }
