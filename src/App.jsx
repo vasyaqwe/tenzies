@@ -63,12 +63,14 @@ function App() {
         .map(die => !die.isHeld ? { ...die, value: Math.ceil(Math.random() * 6) } : die))
     }
   }
+
   useEffect(() => {
     if (dice.every(die => die.isHeld && die.value === dice[0].value)) {
       setTenzies(true)
       setIsStopWatchActive(false)
     }
   }, [dice])
+
   const diceEls = dice.map(die =>
     <Die key={die.id}
       value={die.value}
@@ -76,7 +78,10 @@ function App() {
       holdDice={() => holdDice(die.id)}
     />
   )
+
   const seconds = `${(Math.floor((time / 1000) % 60))}.${("0" + ((time / 10) % 100)).slice(-2)}`
+  const recordTime = localStorage.getItem('time')
+  const recordSeconds = `${(Math.floor((recordTime / 1000) % 60))}.${("0" + ((recordTime / 10) % 100)).slice(-2)}`
 
   return (
     <main>
@@ -87,7 +92,9 @@ function App() {
         {diceEls}
       </div>
       <button onClick={handleClick}>{tenzies ? 'New game' : 'Roll'}</button>
-      <span className='time'>🕒{seconds}</span>
+      <div className="time-wrapper">
+        <span className='time'>🕒{seconds}</span> {recordTime && <span className='record-time'>🏆{recordSeconds}</span>}
+      </div>
     </main>
   )
 }
